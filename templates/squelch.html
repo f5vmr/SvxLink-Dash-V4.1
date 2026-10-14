@@ -137,6 +137,25 @@
                 </option>
             </select>
         </div>
+        <div class="field-group">
+            <label class="label">GPIOD PTT sense</label>
+
+            <div class="note">
+                Select the active state required by the transmitter interface.<br>
+                Active Low will invert the configured GPIOD PTT output.
+            </div>
+
+            <select class="input-field" name="ptt_gpio_invert">
+                <option value="no"
+                        {% if not model.get('gpio', {}).get('ptt', {}).get('invert') %}selected{% endif %}>
+                    Active High
+                </option>
+                <option value="yes"
+                        {% if model.get('gpio', {}).get('ptt', {}).get('invert') %}selected{% endif %}>
+                    Active Low
+                </option>
+            </select>
+        </div>
         <div id="ctcss_controls_section" class="form-section">
             <div class="label">CTCSS settings
 

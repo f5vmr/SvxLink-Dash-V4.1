@@ -40,6 +40,7 @@ class SquelchRouteTests(unittest.TestCase):
                     ],
                     "manual_detector": "",
                     "sql_gpio_invert": "yes",
+                    "ptt_gpio_invert": "yes",
                 },
             ):
                 response = dashboard.squelch_page()
@@ -70,6 +71,12 @@ class SquelchRouteTests(unittest.TestCase):
         )
         self.assertFalse(
             model["squelch"]["ctcss_tx"]
+        )
+        self.assertTrue(
+            model["gpio"]["sql"]["invert"]
+        )
+        self.assertTrue(
+            model["gpio"]["ptt"]["invert"]
         )
 
     def test_single_port_invalid_selection_is_not_saved(self):

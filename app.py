@@ -3955,6 +3955,7 @@ def squelch_page():
             model.setdefault("hidraw", {})
             model.setdefault("gpio", {})
             model["gpio"].setdefault("sql", {})
+            model["gpio"].setdefault("ptt", {})
 
             model["serial"]["sql_port"] = str(
                 request.form.get(
@@ -3992,6 +3993,12 @@ def squelch_page():
             model["gpio"]["sql"]["invert"] = (
                 request.form.get(
                     "sql_gpio_invert"
+                ) == "yes"
+            )
+
+            model["gpio"]["ptt"]["invert"] = (
+                request.form.get(
+                    "ptt_gpio_invert"
                 ) == "yes"
             )
 
@@ -7473,7 +7480,10 @@ def reconfigure_page():
                 "id": "squelch",
                 "label": "Squelch / COS",
                 "route": "squelch_page",
-                "description": "Change squelch, COS, or CTCSS settings.",
+                "description": (
+                    "Change squelch, COS polarity, PTT polarity, "
+                    "or CTCSS settings."
+                ),
             },
             {
                 "id": "ident",

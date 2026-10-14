@@ -766,7 +766,12 @@ def render_tx_ptt_block(model):
     gpio = model.get("gpio", {}).get("ptt", {})
 
     chip = gpio.get("chip", "gpiochip0")
-    line = gpio.get("line", 6)
+    line = str(
+        gpio.get("line", 6)
+    ).lstrip("!")
+
+    if gpio.get("invert"):
+        line = f"!{line}"
 
     if ptt_source == "serial":
 

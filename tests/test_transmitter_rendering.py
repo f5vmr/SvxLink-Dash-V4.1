@@ -8,11 +8,44 @@ from renderers.svxlink_renderer import (
     render_port_tx_section,
     render_tx_ctcss_block,
     render_tx_ctcss_logic,
+    render_tx_ptt_block,
     render_transmitter_common_options,
 )
 
 
 class TransmitterRenderingTests(unittest.TestCase):
+
+    def test_single_port_gpiod_ptt_polarity(self):
+        for invert, expected_line in (
+            (False, "PTT_GPIOD_LINE=24"),
+            (True, "PTT_GPIOD_LINE=!24"),
+        ):
+            with self.subTest(invert=invert):
+                rendered = render_tx_ptt_block({
+                    "interface": {
+                        "ptt_source": "gpiod",
+                    },
+                    "gpio": {
+                        "ptt": {
+                            "chip": "gpiochip0",
+                            "line": 24,
+                            "invert": invert,
+                        },
+                    },
+                })
+
+                self.assertIn(
+                    "PTT_TYPE=GPIOD",
+                    rendered.splitlines(),
+                )
+                self.assertIn(
+                    "PTT_GPIOD_CHIP=gpiochip0",
+                    rendered.splitlines(),
+                )
+                self.assertIn(
+                    expected_line,
+                    rendered.splitlines(),
+                )
 
     def make_model(self, family="usb_multi_interface"):
         return {
