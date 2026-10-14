@@ -1,6 +1,7 @@
 # SvxLink-Dash V4.1
 
-SvxLink-Dash V4.1 is a Flask-based configuration and runtime dashboard for SvxLink 26.05.2 and its predecessor.
+SvxLink-Dash V4.1 is a Flask-based configuration and runtime dashboard for SvxLink 26.05.2 and its predecessors.
+Best installed with Svxlink-Bootstrap
 
 It provides a guided environment for configuring, building and operating simplex, repeater and multi-port SvxLink installations. It is suitable for independently operated nodes and is not restricted to a particular reflector network, region or deployment model.
 
