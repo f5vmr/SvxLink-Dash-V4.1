@@ -11,7 +11,7 @@ usage() {
     echo "  $0 set-overlay ics_1x|ics_2x|ics_4x|ics_8x"
     echo "  $0 check-overlay"
     echo "  $0 gpio-names"
-    echo "  $0 configure-pcm1803 ics_1x|ics_2x|ics_4x|ics_8x"
+    echo "  $0 configure-audio-runtime ics_1x|ics_2x|ics_4x|ics_8x"
 }
 
 require_config() {
@@ -226,7 +226,7 @@ EOF
 
     echo "Reboot required before soundcard discovery."
 }
-configure_pcm1803_service() {
+configure_audio_runtime() {
     PROFILE="$1"
     SERVICE="pcm1803_enable.service"
 
@@ -243,10 +243,12 @@ configure_pcm1803_service() {
             done
 
             install -o root -g root -m 0755 \
-                "$SCRIPT_SOURCE" /usr/local/bin/pcm1803_enable.py
+                "$SCRIPT_SOURCE" \
+                /usr/local/bin/pcm1803_enable.py
 
             install -o root -g root -m 0644 \
-                "$SERVICE_SOURCE" "/etc/systemd/system/$SERVICE"
+                "$SERVICE_SOURCE" \
+                "/etc/systemd/system/$SERVICE"
 
             systemctl daemon-reload
 
@@ -256,10 +258,9 @@ configure_pcm1803_service() {
             ;;
 
         ics_1x|ics_2x)
-            echo "Disabling PCM1803 service for $PROFILE..."
+            echo "Removing any PCM1803 service from $PROFILE..."
             systemctl stop "$SERVICE" 2>/dev/null || true
             systemctl disable "$SERVICE" 2>/dev/null || true
-            echo "PCM1803 service disabled for this profile."
 
             if ! command -v amixer >/dev/null 2>&1; then
                 echo "ERROR: amixer is missing. Install alsa-utils."
@@ -271,16 +272,27 @@ configure_pcm1803_service() {
                 exit 1
             fi
 
-            echo "Selecting Fe-Pi line input for $PROFILE..."
+            if ! amixer -c Audio info >/dev/null 2>&1; then
+                echo "ERROR: Fe-Pi ALSA card 'Audio' was not found."
+                exit 1
+            fi
+
+            echo "Configuring Fe-Pi SGTL5000 audio for $PROFILE..."
+
+            amixer -c Audio set 'Headphone' 86% unmute
+            amixer -c Audio set 'PCM' 75%
+            amixer -c Audio set 'Lineout' 58% unmute
+            amixer -c Audio set 'Mic' 59%
             amixer -c Audio set 'Capture Mux' LINE_IN
 
             echo "Saving Fe-Pi mixer settings..."
             alsactl store Audio
-            echo "Fe-Pi line input configured and mixer settings saved."
+
+            echo "Fe-Pi line input and line output configured."
             ;;
 
         *)
-            echo "ERROR: Invalid ICS profile for PCM1803 service: $PROFILE"
+            echo "ERROR: Invalid ICS profile for runtime audio: $PROFILE"
             exit 1
             ;;
     esac
@@ -328,13 +340,14 @@ case "$1" in
     configure-audio-boot)
         configure_audio_boot "$2"
         ;;
-    configure-pcm1803)
+    configure-audio-runtime)
         if [ -z "$2" ]; then
             usage
             exit 1
         fi
-        configure_pcm1803_service "$2"
+        configure_audio_runtime "$2"
         ;;
+
     check-overlay)
         check_overlay
         ;;

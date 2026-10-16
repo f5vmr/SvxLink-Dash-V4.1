@@ -36,6 +36,49 @@ class PreparationControls(HTMLParser):
 
 class IcsPreparationTests(unittest.TestCase):
 
+    def test_audio_runtime_dispatch_for_all_ics_profiles(self):
+        from services import ics_prepare_service
+
+        for profile_id in (
+            "ics_1x",
+            "ics_2x",
+            "ics_4x",
+            "ics_8x",
+        ):
+            with self.subTest(profile=profile_id):
+                with patch.object(
+                    ics_prepare_service,
+                    "_run_helper",
+                    return_value={
+                        "ok": True,
+                        "returncode": 0,
+                        "stdout": "",
+                        "stderr": "",
+                        "command": "",
+                    },
+                ) as helper_mock:
+                    result = ics_prepare_service.configure_audio_runtime(
+                        profile_id
+                    )
+
+                self.assertTrue(result["ok"])
+                helper_mock.assert_called_once_with(
+                    "configure-audio-runtime",
+                    profile_id,
+                )
+
+        with patch.object(
+            ics_prepare_service,
+            "_run_helper",
+        ) as helper_mock:
+            result = ics_prepare_service.configure_audio_runtime(
+                "invalid_profile"
+            )
+
+        self.assertFalse(result["ok"])
+        self.assertIn("Unknown ICS profile", result["stderr"])
+        helper_mock.assert_not_called()
+
     def test_i2c_enablement_persists_i2c_dev_module(self):
         helper_text = Path(
             "install/svxlink_dashboard_ics_prepare"
@@ -152,7 +195,8 @@ class IcsPreparationTests(unittest.TestCase):
         ), patch.object(
             dashboard, "update_model_gpiod_discovery",
         ) as discovery_mock, patch.object(
-            dashboard, "configure_pcm1803",
+            dashboard,
+            "configure_audio_runtime",
         ) as pcm_mock, patch.object(
             dashboard, "render_template", return_value="rendered",
         ), patch.object(
@@ -235,7 +279,7 @@ class IcsPreparationTests(unittest.TestCase):
                     side_effect=discover,
                 ) as discovery_mock, patch.object(
                     dashboard,
-                    "configure_pcm1803",
+                    "configure_audio_runtime",
                     return_value={
                         "ok": pcm_ok,
                         "stdout": "",

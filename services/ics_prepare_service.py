@@ -177,7 +177,13 @@ def configure_audio_boot(profile_id):
     )
 
 
-def configure_pcm1803(profile_id):
+def configure_audio_runtime(profile_id):
+    """
+    Configure runtime audio settings for the selected ICS profile.
+
+    ICS 1x/2x: Fe-Pi SGTL5000 audio controls.
+    ICS 4x/8x: PCM1803 runtime preparation.
+    """
     profile = get_profile(profile_id)
 
     if not profile:
@@ -189,7 +195,7 @@ def configure_pcm1803(profile_id):
             "command": "",
         }
 
-    return _run_helper("configure-pcm1803", profile_id)
+    return _run_helper("configure-audio-runtime", profile_id)
 
 
 def build_ics_status(profile_id=None):

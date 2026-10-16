@@ -98,7 +98,7 @@ from services.activity_service import get_reflector_activity
 from services.hardware_service import get_system_info
 from services.ics_prepare_service import (
     build_ics_status,
-    configure_pcm1803,
+    configure_audio_runtime,
     configure_audio_boot,
     get_ics_profiles,
     set_overlay,
@@ -1165,13 +1165,13 @@ def ics_prepare_page():
                     + ", ".join(missing_lines)
                 )
             else:
-                pcm1803_result = configure_pcm1803(selected_profile)
+                audio_runtime_result = configure_audio_runtime(selected_profile)
 
-                if not pcm1803_result["ok"]:
+                if not audio_runtime_result["ok"]:
                     error = (
-                        pcm1803_result["stderr"]
-                        or pcm1803_result["stdout"]
-                        or "Failed to configure PCM1803 service."
+                        audio_runtime_result["stderr"]
+                        or audio_runtime_result["stdout"]
+                        or "Failed to configure ICS audio runtime."
                     )
                 elif selected_profile in ("ics_4x", "ics_8x"):
                     message = (
@@ -1181,7 +1181,8 @@ def ics_prepare_page():
                 else:
                     message = (
                         message
-                        or "ICS GPIO lines discovered and Fe-Pi line input configured."                    )
+                        or "ICS GPIO lines discovered and Fe-Pi line input configured."
+                    )
 
         except Exception as exc:
             error = f"GPIOD discovery failed: {exc}"
