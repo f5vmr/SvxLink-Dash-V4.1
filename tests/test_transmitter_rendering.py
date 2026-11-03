@@ -221,7 +221,7 @@ class TransmitterRenderingTests(unittest.TestCase):
             rendered,
         )
         self.assertIn(
-            "PTT_GPIOD_LINE=!TX_1",
+            "PTT_GPIOD_LINE=TX_1",
             rendered,
         )
         self.assertNotIn(
@@ -232,6 +232,41 @@ class TransmitterRenderingTests(unittest.TestCase):
         self.assertNotIn(
             "PTT_TYPE=SerialPin",
             rendered,
+        )
+
+    def test_ics_ptt_active_low_polarity(self):
+        node = self.make_node(
+            sql_method="ctcss",
+            ptt_source="hidraw",
+        )
+
+        node["gpio"]["ptt_invert"] = True
+
+        with patch(
+            "renderers.svxlink_renderer."
+            "resolve_gpiod_line",
+            return_value={
+                "chip": "gpiochip4",
+                "line": "TX_1",
+            },
+        ):
+            rendered = render_port_tx_section(
+                self.make_model("ics"),
+                "1",
+                node,
+            )
+
+        self.assertIn(
+            "PTT_TYPE=GPIOD",
+            rendered,
+        )
+        self.assertIn(
+            "PTT_GPIOD_LINE=!TX_1",
+            rendered,
+        )
+        self.assertNotIn(
+            "PTT_GPIOD_LINE=TX_1",
+            rendered.splitlines(),
         )
 
     def test_single_port_optional_tx_ctcss(self):
