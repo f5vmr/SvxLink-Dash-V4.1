@@ -459,7 +459,6 @@ nmcli connection modify Hotspot \
 
 cat > /etc/logrotate.d/svxlink <<'EOF'
 /var/log/svxlink.log {
-    su svxlink svxlink
     daily
     rotate 7
     compress
